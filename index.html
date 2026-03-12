@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPU vs CPU vs TPU Simulation - AI Processing</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #0a0e1a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 20px 10px;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1e3a 100%);
+            border-bottom: 1px solid #2a2e4a;
+        }
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(90deg, #4fc3f7, #ab47bc, #ff7043);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .header p { color: #8892b0; font-size: 0.95rem; }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            padding: 20px;
+            background: #111528;
+            border-radius: 12px;
+            border: 1px solid #2a2e4a;
+        }
+        .controls label { color: #8892b0; font-size: 0.85rem; }
+        .controls select, .controls input[type="range"] {
+            background: #1a1e3a;
+            color: #e0e0e0;
+            border: 1px solid #3a3e5a;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        .controls select:focus { outline: none; border-color: #4fc3f7; }
+
+        .btn {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-start {
+            background: linear-gradient(135deg, #4fc3f7, #29b6f6);
+            color: #0a0e1a;
+        }
+        .btn-start:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(79, 195, 247, 0.4); }
+        .btn-start:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-reset {
+            background: #2a2e4a;
+            color: #e0e0e0;
+        }
+        .btn-reset:hover { background: #3a3e5a; }
+
+        /* Processor Cards Grid */
+        .processors {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+        @media (max-width: 900px) { .processors { grid-template-columns: 1fr; } }
+
+        .proc-card {
+            background: #111528;
+            border-radius: 16px;
+            border: 2px solid #2a2e4a;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+        .proc-card.cpu { --accent: #4fc3f7; }
+        .proc-card.gpu { --accent: #66bb6a; }
+        .proc-card.tpu { --accent: #ff7043; }
+        .proc-card.active { border-color: var(--accent); box-shadow: 0 0 30px color-mix(in srgb, var(--accent) 20%, transparent); }
+        .proc-card.winner { border-color: #ffd54f; box-shadow: 0 0 40px rgba(255, 213, 79, 0.3); }
+
+        .proc-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid #2a2e4a;
+        }
+        .proc-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: color-mix(in srgb, var(--accent) 15%, transparent);
+            color: var(--accent);
+        }
+        .proc-title h2 { font-size: 1.2rem; color: var(--accent); }
+        .proc-title p { font-size: 0.8rem; color: #8892b0; margin-top: 2px; }
+
+        /* Core Grid Visualization */
+        .core-section {
+            padding: 15px 20px;
+        }
+        .core-section h3 {
+            font-size: 0.8rem;
+            color: #8892b0;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .core-grid {
+            display: grid;
+            gap: 3px;
+        }
+        .core-grid.cpu-cores { grid-template-columns: repeat(4, 1fr); }
+        .core-grid.gpu-cores { grid-template-columns: repeat(16, 1fr); }
+        .core-grid.tpu-cores { grid-template-columns: repeat(8, 1fr); }
+
+        .core {
+            aspect-ratio: 1;
+            border-radius: 3px;
+            background: #1a1e3a;
+            transition: background 0.15s;
+            min-width: 0;
+        }
+        .core.active { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+        .core.done { background: color-mix(in srgb, var(--accent) 40%, transparent); }
+
+        /* Stats */
+        .stats-section { padding: 15px 20px; }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid #1a1e3a;
+        }
+        .stat-row:last-child { border: none; }
+        .stat-label { font-size: 0.8rem; color: #8892b0; }
+        .stat-value { font-size: 0.9rem; font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+        /* Progress Bar */
+        .progress-section { padding: 10px 20px 20px; }
+        .progress-bar {
+            height: 8px;
+            background: #1a1e3a;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent);
+            border-radius: 4px;
+            transition: width 0.1s linear;
+        }
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #8892b0;
+            margin-top: 6px;
+        }
+
+        /* Benchmark Results */
+        .results {
+            margin: 20px 0;
+            background: #111528;
+            border-radius: 16px;
+            border: 1px solid #2a2e4a;
+            padding: 25px;
+            display: none;
+        }
+        .results.show { display: block; }
+        .results h2 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #ffd54f;
+        }
+        .result-bars { display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; }
+        .result-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .result-name {
+            width: 60px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: right;
+        }
+        .result-bar-wrap {
+            flex: 1;
+            height: 36px;
+            background: #1a1e3a;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        .result-bar-fill {
+            height: 100%;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #0a0e1a;
+            transition: width 1s ease;
+        }
+        .result-rank {
+            width: 30px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        /* Pros & Cons */
+        .comparison {
+            margin: 20px 0;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        @media (max-width: 900px) { .comparison { grid-template-columns: 1fr; } }
+
+        .comp-card {
+            background: #111528;
+            border-radius: 16px;
+            border: 1px solid #2a2e4a;
+            padding: 25px;
+        }
+        .comp-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .comp-card.cpu h3 { color: #4fc3f7; }
+        .comp-card.gpu h3 { color: #66bb6a; }
+        .comp-card.tpu h3 { color: #ff7043; }
+
+        .pros-cons h4 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 12px 0 8px;
+        }
+        .pros-cons h4.pro { color: #66bb6a; }
+        .pros-cons h4.con { color: #ef5350; }
+        .pros-cons ul {
+            list-style: none;
+            padding: 0;
+        }
+        .pros-cons li {
+            font-size: 0.82rem;
+            color: #b0b8cc;
+            padding: 4px 0;
+            padding-left: 18px;
+            position: relative;
+            line-height: 1.4;
+        }
+        .pros-cons li::before {
+            position: absolute;
+            left: 0;
+            font-size: 0.75rem;
+        }
+        .pros-cons .pro-list li::before { content: "+"; color: #66bb6a; font-weight: bold; }
+        .pros-cons .con-list li::before { content: "-"; color: #ef5350; font-weight: bold; }
+
+        .best-for {
+            margin-top: 15px;
+            padding: 12px;
+            background: #1a1e3a;
+            border-radius: 8px;
+        }
+        .best-for h4 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #ffd54f;
+            margin-bottom: 6px;
+        }
+        .best-for p {
+            font-size: 0.82rem;
+            color: #b0b8cc;
+            line-height: 1.4;
+        }
+
+        /* Task Log */
+        .task-log {
+            margin: 20px 0;
+            background: #111528;
+            border-radius: 16px;
+            border: 1px solid #2a2e4a;
+            padding: 20px;
+        }
+        .task-log h3 {
+            font-size: 0.9rem;
+            color: #8892b0;
+            margin-bottom: 10px;
+        }
+        .log-entries {
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.75rem;
+            line-height: 1.6;
+        }
+        .log-entries::-webkit-scrollbar { width: 6px; }
+        .log-entries::-webkit-scrollbar-track { background: #1a1e3a; }
+        .log-entries::-webkit-scrollbar-thumb { background: #3a3e5a; border-radius: 3px; }
+        .log-entry { color: #6a7590; }
+        .log-entry .time { color: #4a5568; }
+        .log-entry.cpu-log .tag { color: #4fc3f7; }
+        .log-entry.gpu-log .tag { color: #66bb6a; }
+        .log-entry.tpu-log .tag { color: #ff7043; }
+        .log-entry.system-log .tag { color: #ffd54f; }
+
+        /* Architecture Diagram */
+        .arch-section {
+            margin: 20px 0;
+            background: #111528;
+            border-radius: 16px;
+            border: 1px solid #2a2e4a;
+            padding: 25px;
+        }
+        .arch-section h2 {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #b0b8cc;
+            margin-bottom: 20px;
+        }
+        .arch-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        @media (max-width: 900px) { .arch-grid { grid-template-columns: 1fr; } }
+        .arch-item {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            background: #1a1e3a;
+        }
+        .arch-item h4 { font-size: 0.9rem; margin-bottom: 12px; }
+        .arch-item.cpu h4 { color: #4fc3f7; }
+        .arch-item.gpu h4 { color: #66bb6a; }
+        .arch-item.tpu h4 { color: #ff7043; }
+        .arch-diagram {
+            font-family: monospace;
+            font-size: 0.65rem;
+            color: #8892b0;
+            line-height: 1.3;
+            white-space: pre;
+            text-align: left;
+            display: inline-block;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #4a5568;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>GPU vs CPU vs TPU Simulator</h1>
+    <p>Visual comparison simulation of processors for AI & Deep Learning workloads</p>
+</div>
+
+<div class="container">
+
+    <!-- Controls -->
+    <div class="controls">
+        <div>
+            <label>Workload AI</label><br>
+            <select id="workload">
+                <option value="matrix">Matrix Multiplication (1024x1024)</option>
+                <option value="training">Neural Network Training (CNN)</option>
+                <option value="inference">Model Inference (Batch)</option>
+                <option value="nlp">NLP Transformer (BERT)</option>
+            </select>
+        </div>
+        <div>
+            <label>Batch Size</label><br>
+            <select id="batchSize">
+                <option value="32">32</option>
+                <option value="64" selected>64</option>
+                <option value="128">128</option>
+                <option value="256">256</option>
+            </select>
+        </div>
+        <div>
+            <label>Simulation Speed</label><br>
+            <input type="range" id="simSpeed" min="1" max="5" value="3" style="width:120px">
+        </div>
+        <button class="btn btn-start" id="startBtn" onclick="startSimulation()">Start Simulation</button>
+        <button class="btn btn-reset" onclick="resetSimulation()">Reset</button>
+    </div>
+
+    <!-- Architecture Diagrams -->
+    <div class="arch-section">
+        <h2>Processor Architecture</h2>
+        <div class="arch-grid">
+            <div class="arch-item cpu">
+                <h4>CPU (Central Processing Unit)</h4>
+                <div class="arch-diagram">
+┌─────────────────────┐
+│   Control Unit      │
+│   ┌─────┐ ┌─────┐  │
+│   │Core1│ │Core2│  │
+│   │ ALU │ │ ALU │  │
+│   │Cache│ │Cache│  │
+│   └─────┘ └─────┘  │
+│   ┌─────┐ ┌─────┐  │
+│   │Core3│ │Core4│  │
+│   │ ALU │ │ ALU │  │
+│   │Cache│ │Cache│  │
+│   └─────┘ └─────┘  │
+│   [  L3 Cache     ] │
+│   [  DRAM         ] │
+└─────────────────────┘
+ 4-16 cores, Complex Logic
+ High Clock Speed, Branch
+ Prediction, Out-of-Order</div>
+            </div>
+            <div class="arch-item gpu">
+                <h4>GPU (Graphics Processing Unit)</h4>
+                <div class="arch-diagram">
+┌─────────────────────┐
+│ SM  SM  SM  SM  SM  │
+│ ││  ││  ││  ││  ││ │
+│ ┌┐  ┌┐  ┌┐  ┌┐  ┌┐ │
+│ ██  ██  ██  ██  ██ │
+│ ██  ██  ██  ██  ██ │
+│ ██  ██  ██  ██  ██ │
+│ ██  ██  ██  ██  ██ │
+│ ██  ██  ██  ██  ██ │
+│ ██  ██  ██  ██  ██ │
+│ ██  ██  ██  ██  ██ │
+│ ██  ██  ██  ██  ██ │
+│ [  HBM / GDDR6   ] │
+└─────────────────────┘
+ 1000s CUDA/Tensor cores
+ SIMT Architecture
+ Massive Parallelism</div>
+            </div>
+            <div class="arch-item tpu">
+                <h4>TPU (Tensor Processing Unit)</h4>
+                <div class="arch-diagram">
+┌─────────────────────┐
+│  Systolic Array     │
+│  ┌──┬──┬──┬──┬──┐  │
+│  │PE│PE│PE│PE│PE│  │
+│  ├──┼──┼──┼──┼──┤  │
+│  │PE│PE│PE│PE│PE│  │
+│  ├──┼──┼──┼──┼──┤  │
+│  │PE│PE│PE│PE│PE│  │
+│  ├──┼──┼──┼──┼──┤  │
+│  │PE│PE│PE│PE│PE│  │
+│  ├──┼──┼──┼──┼──┤  │
+│  │PE│PE│PE│PE│PE│  │
+│  └──┴──┴──┴──┴──┘  │
+│  [ HBM Memory     ] │
+└─────────────────────┘
+ 128x128 Systolic Array
+ Matrix Multiply Unit
+ Optimized for Tensor Ops</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processor Simulation Cards -->
+    <div class="processors">
+        <!-- CPU Card -->
+        <div class="proc-card cpu" id="cpuCard">
+            <div class="proc-header">
+                <div class="proc-icon">CPU</div>
+                <div class="proc-title">
+                    <h2>Central Processing Unit</h2>
+                    <p>8 Cores / 16 Threads @ 5.0 GHz</p>
+                </div>
+            </div>
+            <div class="core-section">
+                <h3>Cores (8 cores - Sequential/Limited Parallel)</h3>
+                <div class="core-grid cpu-cores" id="cpuCores"></div>
+            </div>
+            <div class="stats-section">
+                <div class="stat-row">
+                    <span class="stat-label">Operations/sec</span>
+                    <span class="stat-value" id="cpuOps">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Tasks Completed</span>
+                    <span class="stat-value" id="cpuTasks">0 / 0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Time Elapsed</span>
+                    <span class="stat-value" id="cpuTime">0.00s</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Throughput</span>
+                    <span class="stat-value" id="cpuThroughput">0 GFLOPS</span>
+                </div>
+            </div>
+            <div class="progress-section">
+                <div class="progress-bar"><div class="progress-fill" id="cpuProgress"></div></div>
+                <div class="progress-label">
+                    <span id="cpuPercent">0%</span>
+                    <span id="cpuStatus">Waiting...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- GPU Card -->
+        <div class="proc-card gpu" id="gpuCard">
+            <div class="proc-header">
+                <div class="proc-icon">GPU</div>
+                <div class="proc-title">
+                    <h2>Graphics Processing Unit</h2>
+                    <p>4096 CUDA Cores @ 1.8 GHz</p>
+                </div>
+            </div>
+            <div class="core-section">
+                <h3>CUDA Cores (4096 - Massively Parallel)</h3>
+                <div class="core-grid gpu-cores" id="gpuCores"></div>
+            </div>
+            <div class="stats-section">
+                <div class="stat-row">
+                    <span class="stat-label">Operations/sec</span>
+                    <span class="stat-value" id="gpuOps">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Tasks Completed</span>
+                    <span class="stat-value" id="gpuTasks">0 / 0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Time Elapsed</span>
+                    <span class="stat-value" id="gpuTime">0.00s</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Throughput</span>
+                    <span class="stat-value" id="gpuThroughput">0 TFLOPS</span>
+                </div>
+            </div>
+            <div class="progress-section">
+                <div class="progress-bar"><div class="progress-fill" id="gpuProgress"></div></div>
+                <div class="progress-label">
+                    <span id="gpuPercent">0%</span>
+                    <span id="gpuStatus">Waiting...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TPU Card -->
+        <div class="proc-card tpu" id="tpuCard">
+            <div class="proc-header">
+                <div class="proc-icon">TPU</div>
+                <div class="proc-title">
+                    <h2>Tensor Processing Unit</h2>
+                    <p>128x128 Systolic Array @ 940 MHz</p>
+                </div>
+            </div>
+            <div class="core-section">
+                <h3>Processing Elements (Systolic Array)</h3>
+                <div class="core-grid tpu-cores" id="tpuCores"></div>
+            </div>
+            <div class="stats-section">
+                <div class="stat-row">
+                    <span class="stat-label">Operations/sec</span>
+                    <span class="stat-value" id="tpuOps">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Tasks Completed</span>
+                    <span class="stat-value" id="tpuTasks">0 / 0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Time Elapsed</span>
+                    <span class="stat-value" id="tpuTime">0.00s</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Throughput</span>
+                    <span class="stat-value" id="tpuThroughput">0 TFLOPS</span>
+                </div>
+            </div>
+            <div class="progress-section">
+                <div class="progress-bar"><div class="progress-fill" id="tpuProgress"></div></div>
+                <div class="progress-label">
+                    <span id="tpuPercent">0%</span>
+                    <span id="tpuStatus">Waiting...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Log -->
+    <div class="task-log">
+        <h3>Simulation Log</h3>
+        <div class="log-entries" id="logEntries"></div>
+    </div>
+
+    <!-- Benchmark Results -->
+    <div class="results" id="results">
+        <h2>Benchmark Results</h2>
+        <div class="result-bars" id="resultBars"></div>
+    </div>
+
+    <!-- Pros & Cons -->
+    <div class="comparison">
+        <div class="comp-card cpu">
+            <h3>CPU</h3>
+            <div class="pros-cons">
+                <h4 class="pro">Advantages</h4>
+                <ul class="pro-list">
+                    <li>Flexible for all types of computation</li>
+                    <li>Excels at sequential & branching tasks</li>
+                    <li>Low latency per individual task</li>
+                    <li>Most mature software ecosystem</li>
+                    <li>Great for preprocessing & data pipelines</li>
+                    <li>Easy to debug and optimize</li>
+                </ul>
+                <h4 class="con">Disadvantages</h4>
+                <ul class="con-list">
+                    <li>Very limited parallelism (8-64 cores)</li>
+                    <li>Slow for matrix/tensor operations</li>
+                    <li>Low throughput for batch processing</li>
+                    <li>Inefficient for deep learning training</li>
+                    <li>High power consumption per FLOP</li>
+                </ul>
+            </div>
+            <div class="best-for">
+                <h4>Best For</h4>
+                <p>Data preprocessing, lightweight model serving, prototyping, general-purpose tasks, logic-heavy workloads</p>
+            </div>
+        </div>
+
+        <div class="comp-card gpu">
+            <h3>GPU</h3>
+            <div class="pros-cons">
+                <h4 class="pro">Advantages</h4>
+                <ul class="pro-list">
+                    <li>Thousands of cores for massive parallelism</li>
+                    <li>Most complete AI ecosystem (CUDA, cuDNN)</li>
+                    <li>Flexible: training + inference + graphics</li>
+                    <li>High memory bandwidth (HBM/GDDR6)</li>
+                    <li>Broad framework support (PyTorch, TF)</li>
+                    <li>Tensor Cores for mixed-precision</li>
+                </ul>
+                <h4 class="con">Disadvantages</h4>
+                <ul class="con-list">
+                    <li>Very high power consumption (300-700W)</li>
+                    <li>Expensive (consumer & enterprise)</li>
+                    <li>Limited memory vs TPU (24-80GB)</li>
+                    <li>CPU-GPU data transfer overhead</li>
+                    <li>Less efficient for inference only</li>
+                </ul>
+            </div>
+            <div class="best-for">
+                <h4>Best For</h4>
+                <p>Deep learning training, computer vision, generative AI, research & experimentation, mixed workloads</p>
+            </div>
+        </div>
+
+        <div class="comp-card tpu">
+            <h3>TPU</h3>
+            <div class="pros-cons">
+                <h4 class="pro">Advantages</h4>
+                <ul class="pro-list">
+                    <li>Purpose-built for tensor operations</li>
+                    <li>Highest throughput for matrix multiply</li>
+                    <li>Best power efficiency per FLOP</li>
+                    <li>Systolic array eliminates memory bottleneck</li>
+                    <li>Horizontal scaling via TPU pods</li>
+                    <li>Integrated with Google Cloud & JAX/TF</li>
+                </ul>
+                <h4 class="con">Disadvantages</h4>
+                <ul class="con-list">
+                    <li>Only available via Google Cloud</li>
+                    <li>Limited to TensorFlow/JAX</li>
+                    <li>Not flexible for non-AI workloads</li>
+                    <li>Limited PyTorch support</li>
+                    <li>Poor fit for small models/custom ops</li>
+                </ul>
+            </div>
+            <div class="best-for">
+                <h4>Best For</h4>
+                <p>Large model training (LLM, BERT), large-scale inference, TensorFlow/JAX workloads, cost-effective cloud AI</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>This simulation illustrates conceptual and relative differences. Actual numbers vary based on specific hardware.</p>
+    </div>
+</div>
+
+<script>
+// Simulation Configuration per workload
+const WORKLOAD_CONFIG = {
+    matrix: {
+        name: "Matrix Multiplication 1024x1024",
+        totalOps: 2147483648, // 2 * 1024^3
+        // Relative speed factors (normalized to CPU=1)
+        cpuFactor: 1,
+        gpuFactor: 45,
+        tpuFactor: 65,
+        // Parallelism utilization
+        cpuParallel: 0.3,
+        gpuParallel: 0.95,
+        tpuParallel: 0.99,
+    },
+    training: {
+        name: "CNN Training (ResNet-50, 1 epoch)",
+        totalOps: 8000000000,
+        cpuFactor: 1,
+        gpuFactor: 55,
+        tpuFactor: 70,
+        cpuParallel: 0.15,
+        gpuParallel: 0.92,
+        tpuParallel: 0.97,
+    },
+    inference: {
+        name: "Batch Inference (Image Classification)",
+        totalOps: 1000000000,
+        cpuFactor: 1,
+        gpuFactor: 35,
+        tpuFactor: 80,
+        cpuParallel: 0.4,
+        gpuParallel: 0.88,
+        tpuParallel: 0.98,
+    },
+    nlp: {
+        name: "NLP Transformer (BERT-Base)",
+        totalOps: 12000000000,
+        cpuFactor: 1,
+        gpuFactor: 50,
+        tpuFactor: 75,
+        cpuParallel: 0.1,
+        gpuParallel: 0.9,
+        tpuParallel: 0.96,
+    }
+};
+
+let simInterval = null;
+let simRunning = false;
+let simState = {};
+
+// Initialize core grids
+function initCores() {
+    const cpuGrid = document.getElementById('cpuCores');
+    const gpuGrid = document.getElementById('gpuCores');
+    const tpuGrid = document.getElementById('tpuCores');
+
+    cpuGrid.innerHTML = '';
+    gpuGrid.innerHTML = '';
+    tpuGrid.innerHTML = '';
+
+    // CPU: 16 cores (4x4)
+    for (let i = 0; i < 16; i++) {
+        const core = document.createElement('div');
+        core.className = 'core';
+        core.id = `cpu-core-${i}`;
+        cpuGrid.appendChild(core);
+    }
+
+    // GPU: 256 visual cores (16x16 representing thousands)
+    for (let i = 0; i < 256; i++) {
+        const core = document.createElement('div');
+        core.className = 'core';
+        core.id = `gpu-core-${i}`;
+        gpuGrid.appendChild(core);
+    }
+
+    // TPU: 64 visual PEs (8x8 representing systolic array)
+    for (let i = 0; i < 64; i++) {
+        const core = document.createElement('div');
+        core.className = 'core';
+        core.id = `tpu-core-${i}`;
+        tpuGrid.appendChild(core);
+    }
+}
+
+function addLog(message, type = 'system') {
+    const logDiv = document.getElementById('logEntries');
+    const now = new Date();
+    const time = now.toLocaleTimeString('en', { hour12: false }) + '.' + String(now.getMilliseconds()).padStart(3, '0');
+    const tagMap = { cpu: 'CPU', gpu: 'GPU', tpu: 'TPU', system: 'SYS' };
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${type}-log`;
+    entry.innerHTML = `<span class="time">[${time}]</span> <span class="tag">[${tagMap[type]}]</span> ${message}`;
+    logDiv.appendChild(entry);
+    logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+function formatOps(n) {
+    if (n >= 1e12) return (n / 1e12).toFixed(2) + 'T';
+    if (n >= 1e9) return (n / 1e9).toFixed(2) + 'G';
+    if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+    if (n >= 1e3) return (n / 1e3).toFixed(2) + 'K';
+    return n.toFixed(0);
+}
+
+function startSimulation() {
+    if (simRunning) return;
+
+    const workloadKey = document.getElementById('workload').value;
+    const batchSize = parseInt(document.getElementById('batchSize').value);
+    const speed = parseInt(document.getElementById('simSpeed').value);
+    const config = WORKLOAD_CONFIG[workloadKey];
+
+    const batchMultiplier = batchSize / 64;
+    const totalTasks = Math.round(100 * batchMultiplier);
+
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('logEntries').innerHTML = '';
+    document.getElementById('results').classList.remove('show');
+
+    simRunning = true;
+
+    // Activate cards
+    document.querySelectorAll('.proc-card').forEach(c => { c.classList.add('active'); c.classList.remove('winner'); });
+
+    addLog(`Starting simulation: ${config.name}`, 'system');
+    addLog(`Batch size: ${batchSize}, Total tasks: ${totalTasks}`, 'system');
+
+    // Base ops per tick for CPU
+    const baseOpsPerTick = 500000 * speed;
+
+    simState = {
+        config,
+        totalTasks,
+        speed,
+        tick: 0,
+        // CPU state
+        cpuDone: 0,
+        cpuOps: 0,
+        cpuOpsPerTick: baseOpsPerTick * config.cpuFactor,
+        cpuFinished: false,
+        cpuTime: 0,
+        // GPU state
+        gpuDone: 0,
+        gpuOps: 0,
+        gpuOpsPerTick: baseOpsPerTick * config.gpuFactor,
+        gpuFinished: false,
+        gpuTime: 0,
+        // TPU state
+        tpuDone: 0,
+        tpuOps: 0,
+        tpuOpsPerTick: baseOpsPerTick * config.tpuFactor,
+        tpuFinished: false,
+        tpuTime: 0,
+        finishOrder: [],
+    };
+
+    addLog(`CPU: ${(simState.cpuOpsPerTick * 50).toExponential(2)} ops/sec estimated`, 'cpu');
+    addLog(`GPU: ${(simState.gpuOpsPerTick * 50).toExponential(2)} ops/sec estimated (${config.gpuFactor}x vs CPU)`, 'gpu');
+    addLog(`TPU: ${(simState.tpuOpsPerTick * 50).toExponential(2)} ops/sec estimated (${config.tpuFactor}x vs CPU)`, 'tpu');
+
+    simInterval = setInterval(simulationTick, 20);
+}
+
+function simulationTick() {
+    const s = simState;
+    s.tick++;
+    const elapsed = s.tick * 0.02;
+
+    const totalOpsNeeded = s.config.totalOps;
+
+    // CPU update
+    if (!s.cpuFinished) {
+        const jitter = 0.9 + Math.random() * 0.2;
+        s.cpuOps += s.cpuOpsPerTick * jitter;
+        s.cpuTime = elapsed;
+
+        const cpuProgress = Math.min(s.cpuOps / totalOpsNeeded, 1);
+        s.cpuDone = Math.floor(cpuProgress * s.totalTasks);
+
+        updateProcessorUI('cpu', cpuProgress, s.cpuOps, s.cpuDone, s.totalTasks, s.cpuTime, s.config.cpuParallel);
+
+        if (cpuProgress >= 1) {
+            s.cpuFinished = true;
+            s.finishOrder.push({ name: 'CPU', time: s.cpuTime, color: '#4fc3f7' });
+            addLog(`Completed! Time: ${s.cpuTime.toFixed(2)}s`, 'cpu');
+            document.getElementById('cpuStatus').textContent = 'Completed!';
+        }
+    }
+
+    // GPU update
+    if (!s.gpuFinished) {
+        const jitter = 0.92 + Math.random() * 0.16;
+        s.gpuOps += s.gpuOpsPerTick * jitter;
+        s.gpuTime = elapsed;
+
+        const gpuProgress = Math.min(s.gpuOps / totalOpsNeeded, 1);
+        s.gpuDone = Math.floor(gpuProgress * s.totalTasks);
+
+        updateProcessorUI('gpu', gpuProgress, s.gpuOps, s.gpuDone, s.totalTasks, s.gpuTime, s.config.gpuParallel);
+
+        if (gpuProgress >= 1) {
+            s.gpuFinished = true;
+            s.finishOrder.push({ name: 'GPU', time: s.gpuTime, color: '#66bb6a' });
+            addLog(`Completed! Time: ${s.gpuTime.toFixed(2)}s`, 'gpu');
+            document.getElementById('gpuStatus').textContent = 'Completed!';
+        }
+    }
+
+    // TPU update
+    if (!s.tpuFinished) {
+        const jitter = 0.93 + Math.random() * 0.14;
+        s.tpuOps += s.tpuOpsPerTick * jitter;
+        s.tpuTime = elapsed;
+
+        const tpuProgress = Math.min(s.tpuOps / totalOpsNeeded, 1);
+        s.tpuDone = Math.floor(tpuProgress * s.totalTasks);
+
+        updateProcessorUI('tpu', tpuProgress, s.tpuOps, s.tpuDone, s.totalTasks, s.tpuTime, s.config.tpuParallel);
+
+        if (tpuProgress >= 1) {
+            s.tpuFinished = true;
+            s.finishOrder.push({ name: 'TPU', time: s.tpuTime, color: '#ff7043' });
+            addLog(`Completed! Time: ${s.tpuTime.toFixed(2)}s`, 'tpu');
+            document.getElementById('tpuStatus').textContent = 'Completed!';
+        }
+    }
+
+    // All done
+    if (s.cpuFinished && s.gpuFinished && s.tpuFinished) {
+        clearInterval(simInterval);
+        simRunning = false;
+        document.getElementById('startBtn').disabled = false;
+        document.querySelectorAll('.proc-card').forEach(c => c.classList.remove('active'));
+
+        showResults();
+    }
+}
+
+function updateProcessorUI(type, progress, ops, done, total, time, parallelUtil) {
+    const percent = Math.floor(progress * 100);
+    document.getElementById(`${type}Progress`).style.width = percent + '%';
+    document.getElementById(`${type}Percent`).textContent = percent + '%';
+    document.getElementById(`${type}Ops`).textContent = formatOps(ops);
+    document.getElementById(`${type}Tasks`).textContent = `${done} / ${total}`;
+    document.getElementById(`${type}Time`).textContent = time.toFixed(2) + 's';
+    document.getElementById(`${type}Status`).textContent = 'Processing...';
+
+    const throughputVal = ops / Math.max(time, 0.01);
+    if (type === 'cpu') {
+        document.getElementById(`${type}Throughput`).textContent = formatOps(throughputVal) + ' FLOPS';
+    } else {
+        document.getElementById(`${type}Throughput`).textContent = (throughputVal / 1e12).toFixed(2) + ' TFLOPS';
+    }
+
+    // Animate cores
+    animateCores(type, progress, parallelUtil);
+}
+
+function animateCores(type, progress, parallelUtil) {
+    let coreCount, prefix;
+    if (type === 'cpu') { coreCount = 16; prefix = 'cpu-core-'; }
+    else if (type === 'gpu') { coreCount = 256; prefix = 'gpu-core-'; }
+    else { coreCount = 64; prefix = 'tpu-core-'; }
+
+    const activeCores = Math.floor(coreCount * parallelUtil);
+    const doneCores = Math.floor(coreCount * progress);
+
+    for (let i = 0; i < coreCount; i++) {
+        const core = document.getElementById(prefix + i);
+        if (i < doneCores) {
+            core.className = 'core done';
+        } else if (i < activeCores) {
+            // Flickering active effect
+            if (Math.random() > 0.3) {
+                core.className = 'core active';
+            } else {
+                core.className = 'core';
+            }
+        } else {
+            core.className = 'core';
+        }
+    }
+}
+
+function showResults() {
+    const s = simState;
+    addLog('Simulation complete! Displaying results...', 'system');
+
+    // Sort by time (fastest first)
+    s.finishOrder.sort((a, b) => a.time - b.time);
+
+    const maxTime = s.finishOrder[s.finishOrder.length - 1].time;
+    const medals = ['&#x1F947;', '&#x1F948;', '&#x1F949;'];
+
+    // Highlight winner
+    const winnerName = s.finishOrder[0].name.toLowerCase();
+    document.getElementById(`${winnerName}Card`).classList.add('winner');
+
+    const resultBars = document.getElementById('resultBars');
+    resultBars.innerHTML = '';
+
+    s.finishOrder.forEach((entry, idx) => {
+        const row = document.createElement('div');
+        row.className = 'result-row';
+        const barWidth = Math.max((1 - entry.time / maxTime) * 100, 15);
+        const speedup = (s.finishOrder[s.finishOrder.length - 1].time / entry.time).toFixed(1);
+
+        row.innerHTML = `
+            <span class="result-name" style="color: ${entry.color}">${entry.name}</span>
+            <div class="result-bar-wrap">
+                <div class="result-bar-fill" style="width: ${barWidth}%; background: ${entry.color};">
+                    ${entry.time.toFixed(2)}s ${idx === 0 ? '' : '(' + speedup + 'x slower)'}
+                </div>
+            </div>
+            <span class="result-rank">${medals[idx]}</span>
+        `;
+        resultBars.appendChild(row);
+
+        addLog(`#${idx + 1} ${entry.name}: ${entry.time.toFixed(2)}s ${idx === 0 ? '(FASTEST)' : `(${speedup}x slower)`}`, entry.name.toLowerCase());
+    });
+
+    // Speedup summary
+    const fastest = s.finishOrder[0];
+    const slowest = s.finishOrder[s.finishOrder.length - 1];
+    const overallSpeedup = (slowest.time / fastest.time).toFixed(1);
+
+    const summary = document.createElement('div');
+    summary.style.cssText = 'text-align: center; margin-top: 20px; padding: 15px; background: #1a1e3a; border-radius: 10px;';
+    summary.innerHTML = `
+        <p style="color: #ffd54f; font-weight: 600; font-size: 1.1rem; margin-bottom: 5px;">
+            ${fastest.name} wins with ${overallSpeedup}x speedup vs ${slowest.name}
+        </p>
+        <p style="color: #8892b0; font-size: 0.85rem;">
+            Workload: ${s.config.name} | Parallel efficiency: CPU ${(s.config.cpuParallel*100).toFixed(0)}%, GPU ${(s.config.gpuParallel*100).toFixed(0)}%, TPU ${(s.config.tpuParallel*100).toFixed(0)}%
+        </p>
+    `;
+    resultBars.appendChild(summary);
+
+    document.getElementById('results').classList.add('show');
+}
+
+function resetSimulation() {
+    if (simInterval) clearInterval(simInterval);
+    simRunning = false;
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('results').classList.remove('show');
+
+    document.querySelectorAll('.proc-card').forEach(c => { c.classList.remove('active', 'winner'); });
+
+    ['cpu', 'gpu', 'tpu'].forEach(type => {
+        document.getElementById(`${type}Progress`).style.width = '0%';
+        document.getElementById(`${type}Percent`).textContent = '0%';
+        document.getElementById(`${type}Ops`).textContent = '0';
+        document.getElementById(`${type}Tasks`).textContent = '0 / 0';
+        document.getElementById(`${type}Time`).textContent = '0.00s';
+        document.getElementById(`${type}Throughput`).textContent = type === 'cpu' ? '0 GFLOPS' : '0 TFLOPS';
+        document.getElementById(`${type}Status`).textContent = 'Waiting...';
+    });
+
+    document.getElementById('logEntries').innerHTML = '';
+    initCores();
+    addLog('Simulation reset. Ready to start.', 'system');
+}
+
+// Init
+initCores();
+addLog('Simulator ready. Select a workload and click "Start Simulation".', 'system');
+</script>
+
+</body>
+</html>
