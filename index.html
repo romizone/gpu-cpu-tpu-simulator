@@ -77,7 +77,167 @@
         }
         .btn-reset:hover { background: #3a3e5a; }
 
-        /* Processor Cards Grid */
+        /* === RACE TIMELINE === */
+        .race-section {
+            margin: 20px 0;
+            background: #111528;
+            border-radius: 16px;
+            border: 1px solid #2a2e4a;
+            padding: 25px;
+        }
+        .race-section h2 {
+            font-size: 1.1rem;
+            color: #8892b0;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+        .race-subtitle {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #4a5568;
+            margin-bottom: 20px;
+        }
+
+        /* Global elapsed timer */
+        .global-timer {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .global-timer .timer-value {
+            font-size: 2.8rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: #ffd54f;
+            letter-spacing: 2px;
+        }
+        .global-timer .timer-label {
+            font-size: 0.75rem;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Race lanes */
+        .race-lanes {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .race-lane {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .race-label {
+            width: 50px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .race-label.cpu { color: #4fc3f7; }
+        .race-label.gpu { color: #66bb6a; }
+        .race-label.tpu { color: #ff7043; }
+
+        .race-track {
+            flex: 1;
+            height: 40px;
+            background: #1a1e3a;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #2a2e4a;
+        }
+        .race-track::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #ffd54f;
+            border-radius: 0 20px 20px 0;
+            z-index: 2;
+        }
+        .race-runner {
+            position: absolute;
+            left: 0;
+            top: 2px;
+            bottom: 2px;
+            border-radius: 18px;
+            min-width: 36px;
+            width: 0%;
+            transition: width 0.08s linear;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #0a0e1a;
+            z-index: 1;
+        }
+        .race-runner.cpu { background: linear-gradient(90deg, #29b6f6, #4fc3f7); }
+        .race-runner.gpu { background: linear-gradient(90deg, #43a047, #66bb6a); }
+        .race-runner.tpu { background: linear-gradient(90deg, #e64a19, #ff7043); }
+
+        @keyframes runnerPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .race-runner.running {
+            animation: runnerPulse 0.6s ease-in-out infinite;
+        }
+        .race-runner.finished {
+            animation: none;
+            opacity: 1;
+        }
+
+        .race-time-label {
+            width: 100px;
+            text-align: left;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            flex-shrink: 0;
+            color: #6a7590;
+        }
+        .race-time-label.finished-time { color: #ffd54f; }
+
+        /* Finish order badges */
+        .finish-badges {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .finish-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #1a1e3a;
+            border-radius: 20px;
+            border: 1px solid #2a2e4a;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s ease;
+        }
+        .finish-badge.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .finish-badge .medal { font-size: 1.3rem; }
+        .finish-badge .badge-name { font-weight: 700; font-size: 0.85rem; }
+        .finish-badge .badge-time { font-size: 0.75rem; color: #8892b0; font-variant-numeric: tabular-nums; }
+        .finish-badge.rank-1 { border-color: #ffd54f; background: rgba(255, 213, 79, 0.08); }
+        .finish-badge.rank-2 { border-color: #b0bec5; background: rgba(176, 190, 197, 0.05); }
+        .finish-badge.rank-3 { border-color: #a1887f; background: rgba(161, 136, 127, 0.05); }
+
+        /* === PROCESSOR CARDS === */
         .processors {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -91,13 +251,30 @@
             border-radius: 16px;
             border: 2px solid #2a2e4a;
             overflow: hidden;
-            transition: border-color 0.3s;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
         .proc-card.cpu { --accent: #4fc3f7; }
         .proc-card.gpu { --accent: #66bb6a; }
         .proc-card.tpu { --accent: #ff7043; }
-        .proc-card.active { border-color: var(--accent); box-shadow: 0 0 30px color-mix(in srgb, var(--accent) 20%, transparent); }
         .proc-card.winner { border-color: #ffd54f; box-shadow: 0 0 40px rgba(255, 213, 79, 0.3); }
+
+        /* Status indicator with pulse */
+        @keyframes statusPulse {
+            0%, 100% { box-shadow: 0 0 0 0 var(--accent); }
+            50% { box-shadow: 0 0 0 8px transparent; }
+        }
+        @keyframes borderGlow {
+            0%, 100% { border-color: var(--accent); box-shadow: 0 0 20px color-mix(in srgb, var(--accent) 15%, transparent); }
+            50% { border-color: color-mix(in srgb, var(--accent) 60%, transparent); box-shadow: 0 0 40px color-mix(in srgb, var(--accent) 25%, transparent); }
+        }
+        .proc-card.running {
+            animation: borderGlow 1.5s ease-in-out infinite;
+        }
+        .proc-card.finished {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px color-mix(in srgb, var(--accent) 15%, transparent);
+            animation: none;
+        }
 
         .proc-header {
             padding: 20px;
@@ -117,9 +294,78 @@
             font-weight: bold;
             background: color-mix(in srgb, var(--accent) 15%, transparent);
             color: var(--accent);
+            position: relative;
         }
+        .proc-title { flex: 1; }
         .proc-title h2 { font-size: 1.2rem; color: var(--accent); }
         .proc-title p { font-size: 0.8rem; color: #8892b0; margin-top: 2px; }
+
+        /* Status badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .status-badge.idle {
+            background: #1a1e3a;
+            color: #4a5568;
+        }
+        .status-badge.running-badge {
+            background: color-mix(in srgb, var(--accent) 15%, transparent);
+            color: var(--accent);
+        }
+        .status-badge.finished-badge {
+            background: rgba(255, 213, 79, 0.15);
+            color: #ffd54f;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+        @keyframes dotPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.7); }
+        }
+        .status-badge.running-badge .status-dot {
+            animation: dotPulse 1s ease-in-out infinite;
+        }
+
+        /* Timestamps section */
+        .timestamps {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid #1a1e3a;
+        }
+        .timestamp-item {
+            flex: 1;
+            padding: 10px 15px;
+            text-align: center;
+            border-right: 1px solid #1a1e3a;
+        }
+        .timestamp-item:last-child { border-right: none; }
+        .timestamp-item .ts-label {
+            font-size: 0.65rem;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+        }
+        .timestamp-item .ts-value {
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            color: #6a7590;
+        }
+        .timestamp-item .ts-value.active { color: var(--accent); }
+        .timestamp-item .ts-value.gold { color: #ffd54f; }
 
         /* Core Grid Visualization */
         .core-section {
@@ -144,11 +390,19 @@
             aspect-ratio: 1;
             border-radius: 3px;
             background: #1a1e3a;
-            transition: background 0.15s;
             min-width: 0;
+            transition: none;
         }
-        .core.active { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-        .core.done { background: color-mix(in srgb, var(--accent) 40%, transparent); }
+        @keyframes corePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.45; }
+        }
+        .core.active {
+            background: var(--accent);
+            box-shadow: 0 0 6px var(--accent);
+            animation: corePulse 0.5s ease-in-out infinite;
+        }
+        .core.done { background: color-mix(in srgb, var(--accent) 40%, transparent); animation: none; }
 
         /* Stats */
         .stats-section { padding: 15px 20px; }
@@ -166,18 +420,28 @@
         /* Progress Bar */
         .progress-section { padding: 10px 20px 20px; }
         .progress-bar {
-            height: 8px;
+            height: 10px;
             background: #1a1e3a;
-            border-radius: 4px;
+            border-radius: 5px;
             overflow: hidden;
         }
         .progress-fill {
             height: 100%;
             width: 0%;
-            background: var(--accent);
-            border-radius: 4px;
-            transition: width 0.1s linear;
+            border-radius: 5px;
+            transition: width 0.08s linear;
         }
+        .progress-fill.cpu { background: linear-gradient(90deg, #29b6f6, #4fc3f7); }
+        .progress-fill.gpu { background: linear-gradient(90deg, #43a047, #66bb6a); }
+        .progress-fill.tpu { background: linear-gradient(90deg, #e64a19, #ff7043); }
+
+        @keyframes progressPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .progress-fill.running { animation: progressPulse 1s ease-in-out infinite; }
+        .progress-fill.done { animation: none; opacity: 1; }
+
         .progress-label {
             display: flex;
             justify-content: space-between;
@@ -185,6 +449,109 @@
             color: #8892b0;
             margin-top: 6px;
         }
+
+        /* === TIME COMPARISON PANEL === */
+        .time-compare {
+            margin: 20px 0;
+            background: #111528;
+            border-radius: 16px;
+            border: 1px solid #2a2e4a;
+            padding: 25px;
+            display: none;
+        }
+        .time-compare.show { display: block; }
+        .time-compare h2 {
+            font-size: 1.1rem;
+            color: #ffd54f;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .time-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+        .time-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .time-bar-name {
+            width: 50px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .time-bar-track {
+            flex: 1;
+            height: 44px;
+            background: #1a1e3a;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        .time-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            gap: 10px;
+            font-weight: 700;
+            color: #0a0e1a;
+            transition: width 1s ease;
+            width: 0%;
+        }
+        .time-bar-fill .bar-time {
+            font-size: 1rem;
+        }
+        .time-bar-fill .bar-speedup {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+        .time-bar-medal {
+            width: 36px;
+            text-align: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .time-summary {
+            text-align: center;
+            padding: 18px;
+            background: #1a1e3a;
+            border-radius: 12px;
+            margin-top: 10px;
+        }
+        .time-summary .big-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ffd54f;
+            line-height: 1;
+        }
+        .time-summary .big-label {
+            font-size: 0.85rem;
+            color: #8892b0;
+            margin-top: 6px;
+        }
+        .time-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .time-detail-item {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            background: #0a0e1a;
+        }
+        .time-detail-item .td-proc { font-size: 0.75rem; font-weight: 700; margin-bottom: 4px; }
+        .time-detail-item .td-time { font-size: 1.1rem; font-weight: 700; }
+        .time-detail-item .td-note { font-size: 0.65rem; color: #6a7590; margin-top: 2px; }
 
         /* Benchmark Results */
         .results {
@@ -428,6 +795,45 @@
         <button class="btn btn-reset" onclick="resetSimulation()">Reset</button>
     </div>
 
+    <!-- Race Timeline -->
+    <div class="race-section">
+        <h2>Processing Race</h2>
+        <div class="race-subtitle">Watch the dramatic speed difference between processors</div>
+
+        <div class="global-timer">
+            <div class="timer-label">Elapsed Time</div>
+            <div class="timer-value" id="globalTimer">00:00.000</div>
+        </div>
+
+        <div class="race-lanes">
+            <div class="race-lane">
+                <span class="race-label cpu">CPU</span>
+                <div class="race-track">
+                    <div class="race-runner cpu" id="cpuRunner"></div>
+                </div>
+                <span class="race-time-label" id="cpuRaceTime">--:--</span>
+            </div>
+            <div class="race-lane">
+                <span class="race-label gpu">GPU</span>
+                <div class="race-track">
+                    <div class="race-runner gpu" id="gpuRunner"></div>
+                </div>
+                <span class="race-time-label" id="gpuRaceTime">--:--</span>
+            </div>
+            <div class="race-lane">
+                <span class="race-label tpu">TPU</span>
+                <div class="race-track">
+                    <div class="race-runner tpu" id="tpuRunner"></div>
+                </div>
+                <span class="race-time-label" id="tpuRaceTime">--:--</span>
+            </div>
+        </div>
+
+        <div class="finish-badges" id="finishBadges">
+            <!-- Populated dynamically -->
+        </div>
+    </div>
+
     <!-- Architecture Diagrams -->
     <div class="arch-section">
         <h2>Processor Architecture</h2>
@@ -435,21 +841,21 @@
             <div class="arch-item cpu">
                 <h4>CPU (Central Processing Unit)</h4>
                 <div class="arch-diagram">
-┌─────────────────────┐
-│   Control Unit      │
-│   ┌─────┐ ┌─────┐  │
-│   │Core1│ │Core2│  │
-│   │ ALU │ │ ALU │  │
-│   │Cache│ │Cache│  │
-│   └─────┘ └─────┘  │
-│   ┌─────┐ ┌─────┐  │
-│   │Core3│ │Core4│  │
-│   │ ALU │ │ ALU │  │
-│   │Cache│ │Cache│  │
-│   └─────┘ └─────┘  │
-│   [  L3 Cache     ] │
-│   [  DRAM         ] │
-└─────────────────────┘
+&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
+&#x2502;   Control Unit      &#x2502;
+&#x2502;   &#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510; &#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;  &#x2502;
+&#x2502;   &#x2502;Core1&#x2502; &#x2502;Core2&#x2502;  &#x2502;
+&#x2502;   &#x2502; ALU &#x2502; &#x2502; ALU &#x2502;  &#x2502;
+&#x2502;   &#x2502;Cache&#x2502; &#x2502;Cache&#x2502;  &#x2502;
+&#x2502;   &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518; &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;  &#x2502;
+&#x2502;   &#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510; &#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;  &#x2502;
+&#x2502;   &#x2502;Core3&#x2502; &#x2502;Core4&#x2502;  &#x2502;
+&#x2502;   &#x2502; ALU &#x2502; &#x2502; ALU &#x2502;  &#x2502;
+&#x2502;   &#x2502;Cache&#x2502; &#x2502;Cache&#x2502;  &#x2502;
+&#x2502;   &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518; &#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;  &#x2502;
+&#x2502;   [  L3 Cache     ] &#x2502;
+&#x2502;   [  DRAM         ] &#x2502;
+&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
  4-16 cores, Complex Logic
  High Clock Speed, Branch
  Prediction, Out-of-Order</div>
@@ -457,20 +863,20 @@
             <div class="arch-item gpu">
                 <h4>GPU (Graphics Processing Unit)</h4>
                 <div class="arch-diagram">
-┌─────────────────────┐
-│ SM  SM  SM  SM  SM  │
-│ ││  ││  ││  ││  ││ │
-│ ┌┐  ┌┐  ┌┐  ┌┐  ┌┐ │
-│ ██  ██  ██  ██  ██ │
-│ ██  ██  ██  ██  ██ │
-│ ██  ██  ██  ██  ██ │
-│ ██  ██  ██  ██  ██ │
-│ ██  ██  ██  ██  ██ │
-│ ██  ██  ██  ██  ██ │
-│ ██  ██  ██  ██  ██ │
-│ ██  ██  ██  ██  ██ │
-│ [  HBM / GDDR6   ] │
-└─────────────────────┘
+&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
+&#x2502; SM  SM  SM  SM  SM  &#x2502;
+&#x2502; &#x2502;&#x2502;  &#x2502;&#x2502;  &#x2502;&#x2502;  &#x2502;&#x2502;  &#x2502;&#x2502; &#x2502;
+&#x2502; &#x250C;&#x2510;  &#x250C;&#x2510;  &#x250C;&#x2510;  &#x250C;&#x2510;  &#x250C;&#x2510; &#x2502;
+&#x2502; &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588; &#x2502;
+&#x2502; &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588; &#x2502;
+&#x2502; &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588; &#x2502;
+&#x2502; &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588; &#x2502;
+&#x2502; &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588; &#x2502;
+&#x2502; &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588; &#x2502;
+&#x2502; &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588; &#x2502;
+&#x2502; &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588;  &#x2588;&#x2588; &#x2502;
+&#x2502; [  HBM / GDDR6   ] &#x2502;
+&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
  1000s CUDA/Tensor cores
  SIMT Architecture
  Massive Parallelism</div>
@@ -478,21 +884,21 @@
             <div class="arch-item tpu">
                 <h4>TPU (Tensor Processing Unit)</h4>
                 <div class="arch-diagram">
-┌─────────────────────┐
-│  Systolic Array     │
-│  ┌──┬──┬──┬──┬──┐  │
-│  │PE│PE│PE│PE│PE│  │
-│  ├──┼──┼──┼──┼──┤  │
-│  │PE│PE│PE│PE│PE│  │
-│  ├──┼──┼──┼──┼──┤  │
-│  │PE│PE│PE│PE│PE│  │
-│  ├──┼──┼──┼──┼──┤  │
-│  │PE│PE│PE│PE│PE│  │
-│  ├──┼──┼──┼──┼──┤  │
-│  │PE│PE│PE│PE│PE│  │
-│  └──┴──┴──┴──┴──┘  │
-│  [ HBM Memory     ] │
-└─────────────────────┘
+&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;
+&#x2502;  Systolic Array     &#x2502;
+&#x2502;  &#x250C;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x2510;  &#x2502;
+&#x2502;  &#x2502;PE&#x2502;PE&#x2502;PE&#x2502;PE&#x2502;PE&#x2502;  &#x2502;
+&#x2502;  &#x251C;&#x2500;&#x2500;&#x253C;&#x2500;&#x2500;&#x253C;&#x2500;&#x2500;&#x253C;&#x2500;&#x2500;&#x253C;&#x2500;&#x2500;&#x2524;  &#x2502;
+&#x2502;  &#x2502;PE&#x2502;PE&#x2502;PE&#x2502;PE&#x2502;PE&#x2502;  &#x2502;
+&#x2502;  &#x251C;&#x2500;&#x2500;&#x253C;&#x2500;&#x2500;&#x253C;&#x2500;&#x2500;&#x253C;&#x2500;&#x2500;&#x253C;&#x2500;&#x2500;&#x2524;  &#x2502;
+&#x2502;  &#x2502;PE&#x2502;PE&#x2502;PE&#x2502;PE&#x2502;PE&#x2502;  &#x2502;
+&#x2502;  &#x251C;&#x2500;&#x2500;&#x253C;&#x2500;&#x2500;&#x253C;&#x2500;&#x2500;&#x253C;&#x2500;&#x2500;&#x253C;&#x2500;&#x2500;&#x2524;  &#x2502;
+&#x2502;  &#x2502;PE&#x2502;PE&#x2502;PE&#x2502;PE&#x2502;PE&#x2502;  &#x2502;
+&#x2502;  &#x251C;&#x2500;&#x2500;&#x253C;&#x2500;&#x2500;&#x253C;&#x2500;&#x2500;&#x253C;&#x2500;&#x2500;&#x253C;&#x2500;&#x2500;&#x2524;  &#x2502;
+&#x2502;  &#x2502;PE&#x2502;PE&#x2502;PE&#x2502;PE&#x2502;PE&#x2502;  &#x2502;
+&#x2502;  &#x2514;&#x2500;&#x2500;&#x2534;&#x2500;&#x2500;&#x2534;&#x2500;&#x2500;&#x2534;&#x2500;&#x2500;&#x2534;&#x2500;&#x2500;&#x2518;  &#x2502;
+&#x2502;  [ HBM Memory     ] &#x2502;
+&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;
  128x128 Systolic Array
  Matrix Multiply Unit
  Optimized for Tensor Ops</div>
@@ -510,6 +916,24 @@
                     <h2>Central Processing Unit</h2>
                     <p>8 Cores / 16 Threads @ 5.0 GHz</p>
                 </div>
+                <div class="status-badge idle" id="cpuBadge">
+                    <span class="status-dot"></span>
+                    <span>IDLE</span>
+                </div>
+            </div>
+            <div class="timestamps">
+                <div class="timestamp-item">
+                    <div class="ts-label">Started</div>
+                    <div class="ts-value" id="cpuStartTime">--:--:--</div>
+                </div>
+                <div class="timestamp-item">
+                    <div class="ts-label">Elapsed</div>
+                    <div class="ts-value" id="cpuElapsed">--</div>
+                </div>
+                <div class="timestamp-item">
+                    <div class="ts-label">Finished</div>
+                    <div class="ts-value" id="cpuFinishTime">--:--:--</div>
+                </div>
             </div>
             <div class="core-section">
                 <h3>Cores (8 cores - Sequential/Limited Parallel)</h3>
@@ -525,16 +949,12 @@
                     <span class="stat-value" id="cpuTasks">0 / 0</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">Time Elapsed</span>
-                    <span class="stat-value" id="cpuTime">0.00s</span>
-                </div>
-                <div class="stat-row">
                     <span class="stat-label">Throughput</span>
                     <span class="stat-value" id="cpuThroughput">0 GFLOPS</span>
                 </div>
             </div>
             <div class="progress-section">
-                <div class="progress-bar"><div class="progress-fill" id="cpuProgress"></div></div>
+                <div class="progress-bar"><div class="progress-fill cpu" id="cpuProgress"></div></div>
                 <div class="progress-label">
                     <span id="cpuPercent">0%</span>
                     <span id="cpuStatus">Waiting...</span>
@@ -549,6 +969,24 @@
                 <div class="proc-title">
                     <h2>Graphics Processing Unit</h2>
                     <p>4096 CUDA Cores @ 1.8 GHz</p>
+                </div>
+                <div class="status-badge idle" id="gpuBadge">
+                    <span class="status-dot"></span>
+                    <span>IDLE</span>
+                </div>
+            </div>
+            <div class="timestamps">
+                <div class="timestamp-item">
+                    <div class="ts-label">Started</div>
+                    <div class="ts-value" id="gpuStartTime">--:--:--</div>
+                </div>
+                <div class="timestamp-item">
+                    <div class="ts-label">Elapsed</div>
+                    <div class="ts-value" id="gpuElapsed">--</div>
+                </div>
+                <div class="timestamp-item">
+                    <div class="ts-label">Finished</div>
+                    <div class="ts-value" id="gpuFinishTime">--:--:--</div>
                 </div>
             </div>
             <div class="core-section">
@@ -565,16 +1003,12 @@
                     <span class="stat-value" id="gpuTasks">0 / 0</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">Time Elapsed</span>
-                    <span class="stat-value" id="gpuTime">0.00s</span>
-                </div>
-                <div class="stat-row">
                     <span class="stat-label">Throughput</span>
                     <span class="stat-value" id="gpuThroughput">0 TFLOPS</span>
                 </div>
             </div>
             <div class="progress-section">
-                <div class="progress-bar"><div class="progress-fill" id="gpuProgress"></div></div>
+                <div class="progress-bar"><div class="progress-fill gpu" id="gpuProgress"></div></div>
                 <div class="progress-label">
                     <span id="gpuPercent">0%</span>
                     <span id="gpuStatus">Waiting...</span>
@@ -589,6 +1023,24 @@
                 <div class="proc-title">
                     <h2>Tensor Processing Unit</h2>
                     <p>128x128 Systolic Array @ 940 MHz</p>
+                </div>
+                <div class="status-badge idle" id="tpuBadge">
+                    <span class="status-dot"></span>
+                    <span>IDLE</span>
+                </div>
+            </div>
+            <div class="timestamps">
+                <div class="timestamp-item">
+                    <div class="ts-label">Started</div>
+                    <div class="ts-value" id="tpuStartTime">--:--:--</div>
+                </div>
+                <div class="timestamp-item">
+                    <div class="ts-label">Elapsed</div>
+                    <div class="ts-value" id="tpuElapsed">--</div>
+                </div>
+                <div class="timestamp-item">
+                    <div class="ts-label">Finished</div>
+                    <div class="ts-value" id="tpuFinishTime">--:--:--</div>
                 </div>
             </div>
             <div class="core-section">
@@ -605,16 +1057,12 @@
                     <span class="stat-value" id="tpuTasks">0 / 0</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">Time Elapsed</span>
-                    <span class="stat-value" id="tpuTime">0.00s</span>
-                </div>
-                <div class="stat-row">
                     <span class="stat-label">Throughput</span>
                     <span class="stat-value" id="tpuThroughput">0 TFLOPS</span>
                 </div>
             </div>
             <div class="progress-section">
-                <div class="progress-bar"><div class="progress-fill" id="tpuProgress"></div></div>
+                <div class="progress-bar"><div class="progress-fill tpu" id="tpuProgress"></div></div>
                 <div class="progress-label">
                     <span id="tpuPercent">0%</span>
                     <span id="tpuStatus">Waiting...</span>
@@ -623,16 +1071,17 @@
         </div>
     </div>
 
+    <!-- Time Comparison (after simulation) -->
+    <div class="time-compare" id="timeCompare">
+        <h2>Time Comparison - The Dramatic Difference</h2>
+        <div class="time-bars" id="timeBars"></div>
+        <div class="time-summary" id="timeSummary"></div>
+    </div>
+
     <!-- Task Log -->
     <div class="task-log">
         <h3>Simulation Log</h3>
         <div class="log-entries" id="logEntries"></div>
-    </div>
-
-    <!-- Benchmark Results -->
-    <div class="results" id="results">
-        <h2>Benchmark Results</h2>
-        <div class="result-bars" id="resultBars"></div>
     </div>
 
     <!-- Pros & Cons -->
@@ -729,12 +1178,10 @@
 const WORKLOAD_CONFIG = {
     matrix: {
         name: "Matrix Multiplication 1024x1024",
-        totalOps: 2147483648, // 2 * 1024^3
-        // Relative speed factors (normalized to CPU=1)
+        totalOps: 2147483648,
         cpuFactor: 1,
         gpuFactor: 45,
         tpuFactor: 65,
-        // Parallelism utilization
         cpuParallel: 0.3,
         gpuParallel: 0.95,
         tpuParallel: 0.99,
@@ -774,6 +1221,7 @@ const WORKLOAD_CONFIG = {
 let simInterval = null;
 let simRunning = false;
 let simState = {};
+let simStartRealTime = null;
 
 // Initialize core grids
 function initCores() {
@@ -785,23 +1233,18 @@ function initCores() {
     gpuGrid.innerHTML = '';
     tpuGrid.innerHTML = '';
 
-    // CPU: 16 cores (4x4)
     for (let i = 0; i < 16; i++) {
         const core = document.createElement('div');
         core.className = 'core';
         core.id = `cpu-core-${i}`;
         cpuGrid.appendChild(core);
     }
-
-    // GPU: 256 visual cores (16x16 representing thousands)
     for (let i = 0; i < 256; i++) {
         const core = document.createElement('div');
         core.className = 'core';
         core.id = `gpu-core-${i}`;
         gpuGrid.appendChild(core);
     }
-
-    // TPU: 64 visual PEs (8x8 representing systolic array)
     for (let i = 0; i < 64; i++) {
         const core = document.createElement('div');
         core.className = 'core';
@@ -830,6 +1273,32 @@ function formatOps(n) {
     return n.toFixed(0);
 }
 
+function formatElapsed(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    const ms = Math.floor((s % 1) * 1000);
+    return `${String(m).padStart(2, '0')}:${String(Math.floor(s)).padStart(2, '0')}.${String(ms).padStart(3, '0')}`;
+}
+
+function formatClock(date) {
+    return date.toLocaleTimeString('en', { hour12: false }) + '.' + String(date.getMilliseconds()).padStart(3, '0');
+}
+
+function setStatusBadge(type, status) {
+    const badge = document.getElementById(`${type}Badge`);
+    badge.className = 'status-badge';
+    if (status === 'idle') {
+        badge.classList.add('idle');
+        badge.innerHTML = '<span class="status-dot"></span><span>IDLE</span>';
+    } else if (status === 'running') {
+        badge.classList.add('running-badge');
+        badge.innerHTML = '<span class="status-dot"></span><span>RUNNING</span>';
+    } else if (status === 'finished') {
+        badge.classList.add('finished-badge');
+        badge.innerHTML = '<span class="status-dot"></span><span>FINISHED</span>';
+    }
+}
+
 function startSimulation() {
     if (simRunning) return;
 
@@ -843,17 +1312,38 @@ function startSimulation() {
 
     document.getElementById('startBtn').disabled = true;
     document.getElementById('logEntries').innerHTML = '';
-    document.getElementById('results').classList.remove('show');
+    document.getElementById('timeCompare').classList.remove('show');
+    document.getElementById('finishBadges').innerHTML = '';
+
+    // Reset race runners
+    ['cpu', 'gpu', 'tpu'].forEach(t => {
+        document.getElementById(`${t}Runner`).style.width = '0%';
+        document.getElementById(`${t}Runner`).className = `race-runner ${t}`;
+        document.getElementById(`${t}RaceTime`).textContent = '--:--';
+        document.getElementById(`${t}RaceTime`).className = 'race-time-label';
+    });
 
     simRunning = true;
+    simStartRealTime = new Date();
+    const startTimeStr = formatClock(simStartRealTime);
 
-    // Activate cards
-    document.querySelectorAll('.proc-card').forEach(c => { c.classList.add('active'); c.classList.remove('winner'); });
+    // Set start times & status
+    ['cpu', 'gpu', 'tpu'].forEach(t => {
+        document.getElementById(`${t}Card`).className = `proc-card ${t} running`;
+        document.getElementById(`${t}StartTime`).textContent = startTimeStr;
+        document.getElementById(`${t}StartTime`).className = 'ts-value active';
+        document.getElementById(`${t}FinishTime`).textContent = '--:--:--';
+        document.getElementById(`${t}FinishTime`).className = 'ts-value';
+        document.getElementById(`${t}Elapsed`).textContent = '0.000s';
+        document.getElementById(`${t}Elapsed`).className = 'ts-value active';
+        document.getElementById(`${t}Runner`).classList.add('running');
+        setStatusBadge(t, 'running');
+    });
 
     addLog(`Starting simulation: ${config.name}`, 'system');
     addLog(`Batch size: ${batchSize}, Total tasks: ${totalTasks}`, 'system');
+    addLog(`Start time: ${startTimeStr}`, 'system');
 
-    // Base ops per tick for CPU
     const baseOpsPerTick = 500000 * speed;
 
     simState = {
@@ -861,30 +1351,18 @@ function startSimulation() {
         totalTasks,
         speed,
         tick: 0,
-        // CPU state
-        cpuDone: 0,
-        cpuOps: 0,
-        cpuOpsPerTick: baseOpsPerTick * config.cpuFactor,
-        cpuFinished: false,
-        cpuTime: 0,
-        // GPU state
-        gpuDone: 0,
-        gpuOps: 0,
-        gpuOpsPerTick: baseOpsPerTick * config.gpuFactor,
-        gpuFinished: false,
-        gpuTime: 0,
-        // TPU state
-        tpuDone: 0,
-        tpuOps: 0,
-        tpuOpsPerTick: baseOpsPerTick * config.tpuFactor,
-        tpuFinished: false,
-        tpuTime: 0,
+        cpuDone: 0, cpuOps: 0, cpuOpsPerTick: baseOpsPerTick * config.cpuFactor,
+        cpuFinished: false, cpuTime: 0, cpuFinishRealTime: null,
+        gpuDone: 0, gpuOps: 0, gpuOpsPerTick: baseOpsPerTick * config.gpuFactor,
+        gpuFinished: false, gpuTime: 0, gpuFinishRealTime: null,
+        tpuDone: 0, tpuOps: 0, tpuOpsPerTick: baseOpsPerTick * config.tpuFactor,
+        tpuFinished: false, tpuTime: 0, tpuFinishRealTime: null,
         finishOrder: [],
     };
 
-    addLog(`CPU: ${(simState.cpuOpsPerTick * 50).toExponential(2)} ops/sec estimated`, 'cpu');
-    addLog(`GPU: ${(simState.gpuOpsPerTick * 50).toExponential(2)} ops/sec estimated (${config.gpuFactor}x vs CPU)`, 'gpu');
-    addLog(`TPU: ${(simState.tpuOpsPerTick * 50).toExponential(2)} ops/sec estimated (${config.tpuFactor}x vs CPU)`, 'tpu');
+    addLog(`CPU: baseline speed, ${(config.cpuParallel*100).toFixed(0)}% parallelism`, 'cpu');
+    addLog(`GPU: ${config.gpuFactor}x faster, ${(config.gpuParallel*100).toFixed(0)}% parallelism`, 'gpu');
+    addLog(`TPU: ${config.tpuFactor}x faster, ${(config.tpuParallel*100).toFixed(0)}% parallelism`, 'tpu');
 
     simInterval = setInterval(simulationTick, 20);
 }
@@ -893,25 +1371,25 @@ function simulationTick() {
     const s = simState;
     s.tick++;
     const elapsed = s.tick * 0.02;
-
     const totalOpsNeeded = s.config.totalOps;
+
+    // Update global timer
+    document.getElementById('globalTimer').textContent = formatElapsed(elapsed);
 
     // CPU update
     if (!s.cpuFinished) {
         const jitter = 0.9 + Math.random() * 0.2;
         s.cpuOps += s.cpuOpsPerTick * jitter;
         s.cpuTime = elapsed;
-
         const cpuProgress = Math.min(s.cpuOps / totalOpsNeeded, 1);
         s.cpuDone = Math.floor(cpuProgress * s.totalTasks);
-
         updateProcessorUI('cpu', cpuProgress, s.cpuOps, s.cpuDone, s.totalTasks, s.cpuTime, s.config.cpuParallel);
 
         if (cpuProgress >= 1) {
             s.cpuFinished = true;
-            s.finishOrder.push({ name: 'CPU', time: s.cpuTime, color: '#4fc3f7' });
-            addLog(`Completed! Time: ${s.cpuTime.toFixed(2)}s`, 'cpu');
-            document.getElementById('cpuStatus').textContent = 'Completed!';
+            s.cpuFinishRealTime = new Date();
+            s.finishOrder.push({ name: 'CPU', time: s.cpuTime, color: '#4fc3f7', realFinish: s.cpuFinishRealTime });
+            finishProcessor('cpu', s.cpuTime, s.cpuFinishRealTime, s.finishOrder.length);
         }
     }
 
@@ -920,17 +1398,15 @@ function simulationTick() {
         const jitter = 0.92 + Math.random() * 0.16;
         s.gpuOps += s.gpuOpsPerTick * jitter;
         s.gpuTime = elapsed;
-
         const gpuProgress = Math.min(s.gpuOps / totalOpsNeeded, 1);
         s.gpuDone = Math.floor(gpuProgress * s.totalTasks);
-
         updateProcessorUI('gpu', gpuProgress, s.gpuOps, s.gpuDone, s.totalTasks, s.gpuTime, s.config.gpuParallel);
 
         if (gpuProgress >= 1) {
             s.gpuFinished = true;
-            s.finishOrder.push({ name: 'GPU', time: s.gpuTime, color: '#66bb6a' });
-            addLog(`Completed! Time: ${s.gpuTime.toFixed(2)}s`, 'gpu');
-            document.getElementById('gpuStatus').textContent = 'Completed!';
+            s.gpuFinishRealTime = new Date();
+            s.finishOrder.push({ name: 'GPU', time: s.gpuTime, color: '#66bb6a', realFinish: s.gpuFinishRealTime });
+            finishProcessor('gpu', s.gpuTime, s.gpuFinishRealTime, s.finishOrder.length);
         }
     }
 
@@ -939,17 +1415,15 @@ function simulationTick() {
         const jitter = 0.93 + Math.random() * 0.14;
         s.tpuOps += s.tpuOpsPerTick * jitter;
         s.tpuTime = elapsed;
-
         const tpuProgress = Math.min(s.tpuOps / totalOpsNeeded, 1);
         s.tpuDone = Math.floor(tpuProgress * s.totalTasks);
-
         updateProcessorUI('tpu', tpuProgress, s.tpuOps, s.tpuDone, s.totalTasks, s.tpuTime, s.config.tpuParallel);
 
         if (tpuProgress >= 1) {
             s.tpuFinished = true;
-            s.finishOrder.push({ name: 'TPU', time: s.tpuTime, color: '#ff7043' });
-            addLog(`Completed! Time: ${s.tpuTime.toFixed(2)}s`, 'tpu');
-            document.getElementById('tpuStatus').textContent = 'Completed!';
+            s.tpuFinishRealTime = new Date();
+            s.finishOrder.push({ name: 'TPU', time: s.tpuTime, color: '#ff7043', realFinish: s.tpuFinishRealTime });
+            finishProcessor('tpu', s.tpuTime, s.tpuFinishRealTime, s.finishOrder.length);
         }
     }
 
@@ -958,20 +1432,84 @@ function simulationTick() {
         clearInterval(simInterval);
         simRunning = false;
         document.getElementById('startBtn').disabled = false;
-        document.querySelectorAll('.proc-card').forEach(c => c.classList.remove('active'));
+        showTimeComparison();
+    }
+}
 
-        showResults();
+function finishProcessor(type, simTime, realTime, rank) {
+    const card = document.getElementById(`${type}Card`);
+    card.className = `proc-card ${type} finished`;
+    if (rank === 1) card.classList.add('winner');
+
+    setStatusBadge(type, 'finished');
+
+    // Set finish time
+    document.getElementById(`${type}FinishTime`).textContent = formatClock(realTime);
+    document.getElementById(`${type}FinishTime`).className = 'ts-value gold';
+    document.getElementById(`${type}Elapsed`).textContent = simTime.toFixed(3) + 's';
+    document.getElementById(`${type}Elapsed`).className = 'ts-value gold';
+
+    // Stop progress pulse
+    document.getElementById(`${type}Progress`).classList.remove('running');
+    document.getElementById(`${type}Progress`).classList.add('done');
+
+    // Race runner
+    const runner = document.getElementById(`${type}Runner`);
+    runner.classList.remove('running');
+    runner.classList.add('finished');
+    runner.style.width = '100%';
+
+    // Race time
+    const raceTimeEl = document.getElementById(`${type}RaceTime`);
+    raceTimeEl.textContent = simTime.toFixed(2) + 's';
+    raceTimeEl.classList.add('finished-time');
+
+    // Stop core animation
+    setCoresFinished(type);
+
+    document.getElementById(`${type}Status`).textContent = rank === 1 ? 'WINNER!' : `Finished #${rank}`;
+
+    addLog(`FINISHED! Time: ${simTime.toFixed(3)}s (Rank #${rank})`, type);
+
+    // Add finish badge
+    const medals = ['&#x1F947;', '&#x1F948;', '&#x1F949;'];
+    const colors = { cpu: '#4fc3f7', gpu: '#66bb6a', tpu: '#ff7043' };
+    const badgeDiv = document.createElement('div');
+    badgeDiv.className = `finish-badge rank-${rank}`;
+    badgeDiv.innerHTML = `
+        <span class="medal">${medals[rank-1]}</span>
+        <span class="badge-name" style="color: ${colors[type]}">${type.toUpperCase()}</span>
+        <span class="badge-time">${simTime.toFixed(3)}s</span>
+    `;
+    document.getElementById('finishBadges').appendChild(badgeDiv);
+    // Trigger show animation
+    requestAnimationFrame(() => badgeDiv.classList.add('show'));
+}
+
+function setCoresFinished(type) {
+    let coreCount, prefix;
+    if (type === 'cpu') { coreCount = 16; prefix = 'cpu-core-'; }
+    else if (type === 'gpu') { coreCount = 256; prefix = 'gpu-core-'; }
+    else { coreCount = 64; prefix = 'tpu-core-'; }
+
+    for (let i = 0; i < coreCount; i++) {
+        document.getElementById(prefix + i).className = 'core done';
     }
 }
 
 function updateProcessorUI(type, progress, ops, done, total, time, parallelUtil) {
     const percent = Math.floor(progress * 100);
-    document.getElementById(`${type}Progress`).style.width = percent + '%';
+    const progressEl = document.getElementById(`${type}Progress`);
+    progressEl.style.width = percent + '%';
+    if (!progressEl.classList.contains('done')) {
+        progressEl.classList.add('running');
+    }
+
     document.getElementById(`${type}Percent`).textContent = percent + '%';
     document.getElementById(`${type}Ops`).textContent = formatOps(ops);
     document.getElementById(`${type}Tasks`).textContent = `${done} / ${total}`;
-    document.getElementById(`${type}Time`).textContent = time.toFixed(2) + 's';
     document.getElementById(`${type}Status`).textContent = 'Processing...';
+    document.getElementById(`${type}Elapsed`).textContent = time.toFixed(3) + 's';
 
     const throughputVal = ops / Math.max(time, 0.01);
     if (type === 'cpu') {
@@ -979,6 +1517,10 @@ function updateProcessorUI(type, progress, ops, done, total, time, parallelUtil)
     } else {
         document.getElementById(`${type}Throughput`).textContent = (throughputVal / 1e12).toFixed(2) + ' TFLOPS';
     }
+
+    // Update race runner
+    document.getElementById(`${type}Runner`).style.width = (progress * 100) + '%';
+    document.getElementById(`${type}RaceTime`).textContent = formatElapsed(time);
 
     // Animate cores
     animateCores(type, progress, parallelUtil);
@@ -998,91 +1540,116 @@ function animateCores(type, progress, parallelUtil) {
         if (i < doneCores) {
             core.className = 'core done';
         } else if (i < activeCores) {
-            // Flickering active effect
-            if (Math.random() > 0.3) {
-                core.className = 'core active';
-            } else {
-                core.className = 'core';
-            }
+            // Staggered pulse - each core has slightly different timing via CSS animation-delay
+            core.className = 'core active';
+            core.style.animationDelay = (i * 37 % 500) + 'ms';
         } else {
             core.className = 'core';
+            core.style.animationDelay = '';
         }
     }
 }
 
-function showResults() {
+function showTimeComparison() {
     const s = simState;
-    addLog('Simulation complete! Displaying results...', 'system');
+    addLog('All processors finished! Generating comparison...', 'system');
 
-    // Sort by time (fastest first)
     s.finishOrder.sort((a, b) => a.time - b.time);
-
-    const maxTime = s.finishOrder[s.finishOrder.length - 1].time;
-    const medals = ['&#x1F947;', '&#x1F948;', '&#x1F949;'];
-
-    // Highlight winner
-    const winnerName = s.finishOrder[0].name.toLowerCase();
-    document.getElementById(`${winnerName}Card`).classList.add('winner');
-
-    const resultBars = document.getElementById('resultBars');
-    resultBars.innerHTML = '';
-
-    s.finishOrder.forEach((entry, idx) => {
-        const row = document.createElement('div');
-        row.className = 'result-row';
-        const barWidth = Math.max((1 - entry.time / maxTime) * 100, 15);
-        const speedup = (s.finishOrder[s.finishOrder.length - 1].time / entry.time).toFixed(1);
-
-        row.innerHTML = `
-            <span class="result-name" style="color: ${entry.color}">${entry.name}</span>
-            <div class="result-bar-wrap">
-                <div class="result-bar-fill" style="width: ${barWidth}%; background: ${entry.color};">
-                    ${entry.time.toFixed(2)}s ${idx === 0 ? '' : '(' + speedup + 'x slower)'}
-                </div>
-            </div>
-            <span class="result-rank">${medals[idx]}</span>
-        `;
-        resultBars.appendChild(row);
-
-        addLog(`#${idx + 1} ${entry.name}: ${entry.time.toFixed(2)}s ${idx === 0 ? '(FASTEST)' : `(${speedup}x slower)`}`, entry.name.toLowerCase());
-    });
-
-    // Speedup summary
     const fastest = s.finishOrder[0];
     const slowest = s.finishOrder[s.finishOrder.length - 1];
+    const maxTime = slowest.time;
+    const medals = ['&#x1F947;', '&#x1F948;', '&#x1F949;'];
+
+    // Highlight winner card
+    const winnerName = fastest.name.toLowerCase();
+    document.getElementById(`${winnerName}Card`).classList.add('winner');
+
+    // Build time bars
+    const timeBars = document.getElementById('timeBars');
+    timeBars.innerHTML = '';
+
+    s.finishOrder.forEach((entry, idx) => {
+        const barWidth = Math.max((entry.time / maxTime) * 100, 8);
+        const speedup = idx === 0 ? 'FASTEST' : (entry.time / fastest.time).toFixed(1) + 'x slower';
+
+        const row = document.createElement('div');
+        row.className = 'time-bar-row';
+        row.innerHTML = `
+            <span class="time-bar-name" style="color: ${entry.color}">${entry.name}</span>
+            <div class="time-bar-track">
+                <div class="time-bar-fill" style="background: ${entry.color};">
+                    <span class="bar-time">${entry.time.toFixed(3)}s</span>
+                    <span class="bar-speedup">${speedup}</span>
+                </div>
+            </div>
+            <span class="time-bar-medal">${medals[idx]}</span>
+        `;
+        timeBars.appendChild(row);
+
+        // Animate bar width
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                row.querySelector('.time-bar-fill').style.width = barWidth + '%';
+            }, idx * 200);
+        });
+    });
+
+    // Build summary
     const overallSpeedup = (slowest.time / fastest.time).toFixed(1);
-
-    const summary = document.createElement('div');
-    summary.style.cssText = 'text-align: center; margin-top: 20px; padding: 15px; background: #1a1e3a; border-radius: 10px;';
-    summary.innerHTML = `
-        <p style="color: #ffd54f; font-weight: 600; font-size: 1.1rem; margin-bottom: 5px;">
-            ${fastest.name} wins with ${overallSpeedup}x speedup vs ${slowest.name}
-        </p>
-        <p style="color: #8892b0; font-size: 0.85rem;">
-            Workload: ${s.config.name} | Parallel efficiency: CPU ${(s.config.cpuParallel*100).toFixed(0)}%, GPU ${(s.config.gpuParallel*100).toFixed(0)}%, TPU ${(s.config.tpuParallel*100).toFixed(0)}%
-        </p>
+    const summaryDiv = document.getElementById('timeSummary');
+    summaryDiv.innerHTML = `
+        <div class="big-number">${overallSpeedup}x</div>
+        <div class="big-label">${fastest.name} faster than ${slowest.name}</div>
+        <div class="time-detail-grid">
+            ${s.finishOrder.map((entry, idx) => `
+                <div class="time-detail-item">
+                    <div class="td-proc" style="color: ${entry.color}">${entry.name}</div>
+                    <div class="td-time" style="color: ${entry.color}">${entry.time.toFixed(3)}s</div>
+                    <div class="td-note">${idx === 0 ? 'Winner' : (entry.time / fastest.time).toFixed(1) + 'x slower'}</div>
+                </div>
+            `).join('')}
+        </div>
     `;
-    resultBars.appendChild(summary);
 
-    document.getElementById('results').classList.add('show');
+    document.getElementById('timeCompare').classList.add('show');
+
+    // Log final results
+    s.finishOrder.forEach((entry, idx) => {
+        const note = idx === 0 ? 'FASTEST' : `${(entry.time / fastest.time).toFixed(1)}x slower`;
+        addLog(`#${idx + 1} ${entry.name}: ${entry.time.toFixed(3)}s (${note})`, entry.name.toLowerCase());
+    });
+    addLog(`Overall: ${fastest.name} is ${overallSpeedup}x faster than ${slowest.name}`, 'system');
 }
 
 function resetSimulation() {
     if (simInterval) clearInterval(simInterval);
     simRunning = false;
+    simStartRealTime = null;
     document.getElementById('startBtn').disabled = false;
-    document.getElementById('results').classList.remove('show');
-
-    document.querySelectorAll('.proc-card').forEach(c => { c.classList.remove('active', 'winner'); });
+    document.getElementById('timeCompare').classList.remove('show');
+    document.getElementById('finishBadges').innerHTML = '';
+    document.getElementById('globalTimer').textContent = '00:00.000';
 
     ['cpu', 'gpu', 'tpu'].forEach(type => {
+        document.getElementById(`${type}Card`).className = `proc-card ${type}`;
         document.getElementById(`${type}Progress`).style.width = '0%';
+        document.getElementById(`${type}Progress`).className = `progress-fill ${type}`;
         document.getElementById(`${type}Percent`).textContent = '0%';
         document.getElementById(`${type}Ops`).textContent = '0';
         document.getElementById(`${type}Tasks`).textContent = '0 / 0';
-        document.getElementById(`${type}Time`).textContent = '0.00s';
         document.getElementById(`${type}Throughput`).textContent = type === 'cpu' ? '0 GFLOPS' : '0 TFLOPS';
         document.getElementById(`${type}Status`).textContent = 'Waiting...';
+        document.getElementById(`${type}StartTime`).textContent = '--:--:--';
+        document.getElementById(`${type}StartTime`).className = 'ts-value';
+        document.getElementById(`${type}Elapsed`).textContent = '--';
+        document.getElementById(`${type}Elapsed`).className = 'ts-value';
+        document.getElementById(`${type}FinishTime`).textContent = '--:--:--';
+        document.getElementById(`${type}FinishTime`).className = 'ts-value';
+        document.getElementById(`${type}Runner`).style.width = '0%';
+        document.getElementById(`${type}Runner`).className = `race-runner ${type}`;
+        document.getElementById(`${type}RaceTime`).textContent = '--:--';
+        document.getElementById(`${type}RaceTime`).className = 'race-time-label';
+        setStatusBadge(type, 'idle');
     });
 
     document.getElementById('logEntries').innerHTML = '';
